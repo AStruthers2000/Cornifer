@@ -1,0 +1,15 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "d:\\code\\unreal\\mapplugindemo\\plugins\\gamefeatures\\cornifer\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\corniferruntime\\module.corniferruntime.cpp",
+        "ProvidedModule": "",
+        "PCH": "d:\\code\\unreal\\mapplugindemo\\intermediate\\build\\win64\\x64\\mapplugindemoeditor\\development\\unrealed\\sharedpch.unrealed.project.valapi.valexpapi.cpp20.h.pch",
+        "Includes": [
+            "d:\\code\\unreal\\mapplugindemo\\plugins\\gamefeatures\\cornifer\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\corniferruntime\\definitions.corniferruntime.h",
+            "d:\\code\\unreal\\mapplugindemo\\plugins\\gamefeatures\\cornifer\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\corniferruntime\\permoduleinline.gen.cpp",
+            "d:\\program files\\epic games\\ue_5.6\\engine\\source\\runtime\\core\\public\\hal\\permoduleinline.inl"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}
