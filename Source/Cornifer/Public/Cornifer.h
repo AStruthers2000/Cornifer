@@ -2,14 +2,13 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-class FCorniferRuntimeModule : public IModuleInterface
+class FCorniferModule : public IModuleInterface
 {
 public:
-	//~IModuleInterface
+
+	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
-	//~End of IModuleInterface
 };

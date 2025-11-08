@@ -3,32 +3,22 @@
 	"Version": 1,
 	"VersionName": "1.0",
 	"FriendlyName": "Cornifer",
-	"Description": "Maps Maps Maps",
-	"Category": "Gameplay",
-	"Type": "Runtime",
-	"LoadingPhase": "Default",
+	"Description": "",
+	"Category": "Other",
 	"CreatedBy": "AStruthers2000",
 	"CreatedByURL": "",
 	"DocsURL": "",
 	"MarketplaceURL": "",
 	"SupportURL": "",
-	"EnabledByDefault": true,
-	"CanContainContent": false,
-	"IsBetaVersion": true,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "CorniferRuntime",
+			"Name": "Cornifer",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}
-	],
-	"Plugins": [
-		{ "Name": "GameFeatures", "Enabled": true },
-		{ "Name": "ModularGameplay", "Enabled": true },
-		{ "Name": "EnhancedInput", "Enabled": true }
-	],
-	"ExplicitlyLoaded": true,
-	"BuiltInInitialFeatureState": "Active"
+	]
 }
