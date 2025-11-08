@@ -8,36 +8,24 @@ public class Cornifer : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicIncludePaths.AddRange(new string[]
-		{
-			// ... add public include paths required here ...
-		});
-
-
-		PrivateIncludePaths.AddRange(new string[]
-		{
-			// ... add other private include paths required here ...
-		});
-
+		PublicIncludePaths.AddRange(new string[] { });
+		PrivateIncludePaths.AddRange(new string[] { });
 
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
 			"Core",
-			// "GameFeatures",
-			"GameplayTags",
-			// "ModularGameplay"
-		});
-
-
-		PrivateDependencyModuleNames.AddRange(new string[]
-		{
 			"CoreUObject",
 			"Engine",
 			"Slate",
 			"SlateCore",
-			"UMG"
+			"UMG",
+			"InputCore",
+			"GameFeatures",
+			"GameplayTags",
+			"ModularGameplay"
 		});
 
+		PrivateDependencyModuleNames.AddRange(new string[] { });
 
 		DynamicallyLoadedModuleNames.AddRange(new string[]
 		{
