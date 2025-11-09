@@ -1,6 +1,7 @@
 ﻿// Copyright (C) 2025 AStruthers2000 - All Rights Reserved
 
 #pragma once
+#include "CorniferMapManager.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "CorniferSubsystem.generated.h"
 
@@ -12,13 +13,21 @@ class CORNIFER_API UCorniferSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 public:
+	void InitializeMapSubsystem(UDataAsset_Map const* MapData, bool bImmediatelyShowMap = true);
+	void DeactivateMapSubsystem();
+
+	UFUNCTION(BlueprintPure, Category = "Cornifer")
+	UCorniferMapManager* GetMapManager() const { return MapManager; }
+	
 	UFUNCTION(BlueprintCallable, Category = "Cornifer")
-	void ShowMap(UTexture2D* MapTexture, int32 ZOrder = 100);
+	void ShowMap() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Cornifer")
-	void HideMap();
+	void HideMap() const;
 
 private:
-	UPROPERTY()
-	UCorniferUserWidget* ImageWidget = nullptr;
+	bool bIsSubsystemInitialized = false;
+
+	UPROPERTY(Transient)
+	UCorniferMapManager* MapManager = nullptr;
 };

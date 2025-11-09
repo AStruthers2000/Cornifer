@@ -8,7 +8,7 @@
 
 void UGameFeatureAction_DisplayMap::AddToWorld(const FWorldContext& WorldContext)
 {
-	UWorld* World = WorldContext.World();
+	const UWorld* World = WorldContext.World();
 	if (!World) return;
 
 	if (World->GetNetMode() == NM_DedicatedServer) return;
@@ -18,11 +18,9 @@ void UGameFeatureAction_DisplayMap::AddToWorld(const FWorldContext& WorldContext
 
 void UGameFeatureAction_DisplayMap::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
 {
-	UE_LOG(LogTemp, Warning, TEXT("[UGameFeatureAction_DisplayMap::OnGameFeatureDeactivating]: Deactivating"));
-
 	for (TWeakObjectPtr W : ActiveWorlds)
 	{
-		if (UWorld* World = W.Get())
+		if (const UWorld* World = W.Get())
 		{
 			DeactivateForWorld(World);
 		}
@@ -32,29 +30,24 @@ void UGameFeatureAction_DisplayMap::OnGameFeatureDeactivating(FGameFeatureDeacti
 	Super::OnGameFeatureDeactivating(Context);
 }
 
-void UGameFeatureAction_DisplayMap::ActivateForWorld(UWorld* World)
+void UGameFeatureAction_DisplayMap::ActivateForWorld(const UWorld* World)
 {
-	if (!World || MapTexture.IsNull())
+	if (!World || !MapData)
 	{
 		return;
 	}
 
-	StreamableManager.RequestAsyncLoad(MapTexture.ToSoftObjectPath(), [this, World]()
+	if (IsValid(World))
 	{
-		if (IsValid(World))
+		ActiveWorlds.Add(World);
+		if (const UGameInstance* GameInstance = World->GetGameInstance())
 		{
-			if (UTexture2D* Texture = MapTexture.Get())
+			if (auto* Subsystem = GameInstance->GetSubsystem<UCorniferSubsystem>())
 			{
-				if (const UGameInstance* GameInstance = World->GetGameInstance())
-				{
-					if (auto* Subsystem = GameInstance->GetSubsystem<UCorniferSubsystem>())
-					{
-						Subsystem->ShowMap(Texture, ZOrder);
-					}
-				}
+				Subsystem->InitializeMapSubsystem(MapData, bShowMapImmediately);
 			}
 		}
-	});
+	}
 }
 
 void UGameFeatureAction_DisplayMap::DeactivateForWorld(const UWorld* World)
@@ -65,7 +58,7 @@ void UGameFeatureAction_DisplayMap::DeactivateForWorld(const UWorld* World)
 	{
 		if (auto* Subsystem = GameInstance->GetSubsystem<UCorniferSubsystem>())
 		{
-			Subsystem->HideMap();
+			Subsystem->DeactivateMapSubsystem();
 		}
 	}
 }

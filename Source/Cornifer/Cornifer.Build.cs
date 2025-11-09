@@ -1,5 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
+using System.IO;
 using UnrealBuildTool;
 
 public class Cornifer : ModuleRules
@@ -8,11 +9,17 @@ public class Cornifer : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicIncludePaths.AddRange(new string[] { });
-		PrivateIncludePaths.AddRange(new string[] { });
+		PublicIncludePaths.AddRange([
+			Path.Combine(PluginDirectory, "Source/Cornifer/Core")
+		]);
+		
+		PrivateIncludePaths.AddRange([
+			Path.Combine(PluginDirectory, "Source/Cornifer/DataAssets"), 
+			Path.Combine(PluginDirectory, "Source/Cornifer/GameFeatureActions"),
+			Path.Combine(PluginDirectory, "Source/Cornifer/Widgets")
+		]);
 
-		PublicDependencyModuleNames.AddRange(new string[]
-		{
+		PublicDependencyModuleNames.AddRange([
 			"Core",
 			"CoreUObject",
 			"Engine",
@@ -23,13 +30,10 @@ public class Cornifer : ModuleRules
 			"GameFeatures",
 			"GameplayTags",
 			"ModularGameplay"
-		});
+		]);
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
+		PrivateDependencyModuleNames.AddRange([]);
 
-		DynamicallyLoadedModuleNames.AddRange(new string[]
-		{
-			// ... add any modules that your module loads dynamically here ...
-		});
+		DynamicallyLoadedModuleNames.AddRange([]);
 	}
 }

@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFeatureAction_WorldActionBase.h"
-#include "Engine/StreamableManager.h"
 #include "GameFeatureAction_DisplayMap.generated.h"
 
+class UDataAsset_Map;
 /**
  * 
  */
@@ -15,20 +15,19 @@ class CORNIFER_API UGameFeatureAction_DisplayMap : public UGameFeatureAction_Wor
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere, Category = "Cornfier")
-	TSoftObjectPtr<UTexture2D> MapTexture;
+	UPROPERTY(EditAnywhere, Category = "Cornifer")
+	UDataAsset_Map* MapData;
 
 	UPROPERTY(EditAnywhere, Category = "Cornifer")
-	int32 ZOrder = 999;
+	bool bShowMapImmediately = true;
 
 protected:
 	virtual void AddToWorld(const FWorldContext& WorldContext) override;
 	virtual void OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context) override;
 
 private:
-	void ActivateForWorld(UWorld* World);
+	void ActivateForWorld(const UWorld* World);
 	static void DeactivateForWorld(const UWorld* World);
 
-	TSet<TWeakObjectPtr<UWorld>> ActiveWorlds;
-	FStreamableManager StreamableManager;
+	TSet<TWeakObjectPtr<const UWorld>> ActiveWorlds;
 };
