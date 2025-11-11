@@ -8,10 +8,13 @@
 void SCorniferZoomPan::Construct(const FArguments& InArgs)
 {
     Texture = InArgs._Texture;
+    MaxZoom = FMath::Max(1.0f, InArgs._MaxZoom);
+    ZoomSpeed = FMath::Max(1.01f, InArgs._ZoomSpeed);
     UpdateBrushFromTexture();
     // Note: We can't properly clamp zoom here since we don't have viewport size yet.
     // Will be clamped on first paint/interaction.
-    Zoom = FMath::Max(InArgs._InitialZoom, 0.1f);
+    Zoom = FMath::Clamp(InArgs._InitialZoom, 0.1f, MaxZoom);
+    bDidFirstPaint = false;
     ChildSlot[SNullWidget::NullWidget]; // we draw directly
 }
 
@@ -27,6 +30,7 @@ void SCorniferZoomPan::ResetView()
     Translation = FVector2D::ZeroVector;
     // Zoom will be clamped to minimum on next paint/interaction
     Zoom = 1.f;
+    bDidFirstPaint = false; // ensure clamp occurs again
     Invalidate(EInvalidateWidget::Paint);
 }
 
@@ -47,6 +51,15 @@ int32 SCorniferZoomPan::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
                                 const int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
     if (!Texture.IsValid()) return LayerId;
+
+    // First paint: clamp initial zoom so the image at least covers the viewport
+    if (!bDidFirstPaint)
+    {
+        const FVector2D ViewSizeFirst = AllottedGeometry.GetLocalSize();
+        const float MinZoom = GetMinimumZoom(ViewSizeFirst);
+        Zoom = FMath::Clamp(Zoom, MinZoom, MaxZoom);
+        bDidFirstPaint = true;
+    }
 
     const FVector2D ViewSize = AllottedGeometry.GetLocalSize();
     const FVector2D ImgSize = Brush.ImageSize * Zoom;
@@ -100,7 +113,8 @@ FReply SCorniferZoomPan::OnMouseWheel(const FGeometry& MyGeometry, const FPointe
     const float MinZoom = GetMinimumZoom(ViewSize);
     
     float OldZoom = Zoom;
-    Zoom = FMath::Clamp(Zoom * (MouseEvent.GetWheelDelta() > 0 ? 1.1f : 1.f/1.1f), MinZoom, 10.f);
+    const float Factor = (MouseEvent.GetWheelDelta() > 0 ? ZoomSpeed : 1.f / ZoomSpeed);
+    Zoom = FMath::Clamp(Zoom * Factor, MinZoom, MaxZoom);
 
     // Zoom about cursor point: adjust translation so the cursor stays on the same image point.
     const FVector2D ImgSizeOld = Brush.ImageSize * OldZoom;

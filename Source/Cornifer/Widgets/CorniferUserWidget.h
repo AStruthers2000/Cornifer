@@ -18,6 +18,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Cornifer")
 	void ResetView();
 
+	// Configure map view behavior; call before or after widget is constructed.
+	UFUNCTION(BlueprintCallable, Category = "Cornifer|Config")
+	void ConfigureMapView(float InMaxZoom, float InZoomSpeed);
+
+	// Configure initial zoom used when the Slate widget is built
+	UFUNCTION(BlueprintCallable, Category = "Cornifer|Config")
+	void ConfigureInitialZoom(float InInitialZoom);
+
 protected:
 	virtual TSharedRef<SWidget> RebuildWidget() override;
 
@@ -26,4 +34,9 @@ private:
 	
 	UPROPERTY()
 	UTexture2D* CurrentMapTexture = nullptr;
+
+	// Stored until Slate widget is built; applied immediately if already available
+	float MaxZoom = 10.f;
+	float ZoomSpeed = 1.1f;
+	float InitialZoom = 1.f;
 };
