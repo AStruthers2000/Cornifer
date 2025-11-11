@@ -63,7 +63,7 @@ public:
 		SLATE_ARGUMENT(float, InitialZoom)
 		SLATE_ARGUMENT(float, MaxZoom)
 		SLATE_ARGUMENT(float, ZoomSpeed)
-		SLATE_SUPPORTS_SLOT(FMapSlot)
+		SLATE_SLOT_ARGUMENT(FMapSlot, Slots)
 	SLATE_END_ARGS()
 
 	SCorniferMapView();
