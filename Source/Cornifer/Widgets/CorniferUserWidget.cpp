@@ -4,6 +4,8 @@
 #include "CoreMinimal.h"
 #include "SCorniferZoomPan.h"
 #include "Cornifer/CorniferDefaultValues.h"
+// For programmatic focus
+#include "Framework/Application/SlateApplication.h"
 
 TSharedRef<SWidget> UCorniferUserWidget::RebuildWidget()
 {
@@ -13,6 +15,20 @@ TSharedRef<SWidget> UCorniferUserWidget::RebuildWidget()
 		.MaxZoom(MaxZoom)
 		.ZoomSpeed(ZoomSpeed);
 	return SlateWidget.ToSharedRef();
+}
+
+void UCorniferUserWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	// Make the UMG widget focusable so focus can reside within it.
+	SetIsFocusable(true);
+
+	// Ensure our Slate child is focusable and receives focus immediately so the first click can pan.
+	if (SlateWidget.IsValid())
+	{
+		FSlateApplication::Get().SetKeyboardFocus(SlateWidget, EFocusCause::SetDirectly);
+	}
 }
 
 void UCorniferUserWidget::SetMapTexture(TSoftObjectPtr<UTexture2D> MapTexture)
