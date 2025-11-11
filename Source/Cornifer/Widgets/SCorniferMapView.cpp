@@ -84,16 +84,16 @@ void SCorniferMapView::OnArrangeChildren(const FGeometry& AllottedGeometry, FArr
 		if (Widget->GetVisibility() != EVisibility::Collapsed)
 		{
 			// Convert map position to screen position
-			const FVector2D ScreenPos = MapToScreen(CurSlot.MapPosition, AllottedGeometry);
+			const FVector2D ScreenPos = MapToScreen(CurSlot.GetMapPosition(), AllottedGeometry);
 			
 			// Get the desired size of the child widget
 			const FVector2D ChildDesiredSize = Widget->GetDesiredSize();
 			
 			// Apply alignment offset
-			const FVector2D AlignmentOffset = -ChildDesiredSize * CurSlot.Alignment;
+			const FVector2D AlignmentOffset = -ChildDesiredSize * CurSlot.GetAlignment();
 			
 			// Final position with pixel offset
-			const FVector2D FinalPos = ScreenPos + AlignmentOffset + CurSlot.PixelOffset;
+			const FVector2D FinalPos = ScreenPos + AlignmentOffset + CurSlot.GetPixelOffset();
 			
 			// Arrange the child
 			ArrangedChildren.AddWidget(

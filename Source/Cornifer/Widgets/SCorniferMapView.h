@@ -21,9 +21,9 @@ public:
 	public:
 		FMapSlot()
 			: TSlotBase<FMapSlot>()
-			, MapPosition(FVector2D::ZeroVector)
-			, Alignment(FVector2D(0.5f, 0.5f))
-			, PixelOffset(FVector2D::ZeroVector)
+			, SlotMapPosition(FVector2D::ZeroVector)
+			, SlotAlignment(FVector2D(0.5f, 0.5f))
+			, SlotPixelOffset(FVector2D::ZeroVector)
 		{
 		}
 
@@ -33,38 +33,39 @@ public:
 		void Construct(const FChildren& SlotOwner, FSlotArguments&& InArgs)
 		{
 			TSlotBase<FMapSlot>::Construct(SlotOwner, MoveTemp(InArgs));
-			if (InArgs.AttachedWidget)
-			{
-				this->AttachWidget(InArgs.AttachedWidget->AsShared());
-			}
 		}
 
 		FMapSlot& MapPosition(FVector2D InPosition)
 		{
-			this->MapPosition = InPosition;
+			SlotMapPosition = InPosition;
 			return *this;
 		}
 
 		FMapSlot& Alignment(FVector2D InAlignment)
 		{
-			this->Alignment = InAlignment;
+			SlotAlignment = InAlignment;
 			return *this;
 		}
 
 		FMapSlot& PixelOffset(FVector2D InOffset)
 		{
-			this->PixelOffset = InOffset;
+			SlotPixelOffset = InOffset;
 			return *this;
 		}
 
+		FVector2D GetMapPosition() const { return SlotMapPosition; }
+		FVector2D GetAlignment() const { return SlotAlignment; }
+		FVector2D GetPixelOffset() const { return SlotPixelOffset; }
+
+	private:
 		/** Position in map pixel coordinates (0,0 = top-left of image) */
-		FVector2D MapPosition = FVector2D::ZeroVector;
+		FVector2D SlotMapPosition;
 		
 		/** Alignment anchor point (0,0 = top-left, 0.5,0.5 = center, 1,1 = bottom-right) */
-		FVector2D Alignment = FVector2D(0.5f, 0.5f);
+		FVector2D SlotAlignment;
 		
 		/** Additional offset in screen pixels after alignment */
-		FVector2D PixelOffset = FVector2D::ZeroVector;
+		FVector2D SlotPixelOffset;
 	};
 
 	SLATE_BEGIN_ARGS(SCorniferMapView)
@@ -89,9 +90,10 @@ public:
 	/** Add a child widget at a specific map position */
 	FMapSlot& AddSlot()
 	{
-		FMapSlot& NewSlot = *(new FMapSlot());
-		Children.AddSlot(MoveTemp(NewSlot));
-		return Children[Children.Num() - 1];
+		FMapSlot::FSlotArguments SlotArguments(MakeUnique<FMapSlot>());
+		FMapSlot& NewSlot = SlotArguments.GetSlot();
+		Children.AddSlot(MoveTemp(SlotArguments));
+		return NewSlot;
 	}
 
 	/** Remove a specific child widget */
