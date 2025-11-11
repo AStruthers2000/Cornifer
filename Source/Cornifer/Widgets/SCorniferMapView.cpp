@@ -21,12 +21,8 @@ void SCorniferMapView::Construct(const FArguments& InArgs)
 	Zoom = FMath::Clamp(InArgs._InitialZoom, 0.1f, MaxZoom);
 	bDidFirstPaint = false;
 
-	// Add any child slots from arguments
-	const int32 NumSlots = InArgs.Slots.Num();
-	for (int32 i = 0; i < NumSlots; ++i)
-	{
-		Children.Add(InArgs.Slots[i]);
-	}
+	// Process any child slots from arguments
+	Children.AddSlots(MoveTemp(const_cast<TArray<FMapSlot::FSlotArguments>&>(InArgs._Slots)));
 }
 
 void SCorniferMapView::SetTexture(UTexture2D* InTexture)

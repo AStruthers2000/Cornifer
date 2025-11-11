@@ -28,27 +28,43 @@ public:
 		}
 
 		SLATE_SLOT_BEGIN_ARGS(FMapSlot, TSlotBase<FMapSlot>)
-			SLATE_ARGUMENT(FVector2D, MapPosition)
-			SLATE_ARGUMENT(FVector2D, Alignment)
-			SLATE_ARGUMENT(FVector2D, PixelOffset)
 		SLATE_SLOT_END_ARGS()
 
 		void Construct(const FChildren& SlotOwner, FSlotArguments&& InArgs)
 		{
 			TSlotBase<FMapSlot>::Construct(SlotOwner, MoveTemp(InArgs));
-			MapPosition = InArgs._MapPosition;
-			Alignment = InArgs._Alignment;
-			PixelOffset = InArgs._PixelOffset;
+			if (InArgs.AttachedWidget)
+			{
+				this->AttachWidget(InArgs.AttachedWidget->AsShared());
+			}
+		}
+
+		FMapSlot& MapPosition(FVector2D InPosition)
+		{
+			this->MapPosition = InPosition;
+			return *this;
+		}
+
+		FMapSlot& Alignment(FVector2D InAlignment)
+		{
+			this->Alignment = InAlignment;
+			return *this;
+		}
+
+		FMapSlot& PixelOffset(FVector2D InOffset)
+		{
+			this->PixelOffset = InOffset;
+			return *this;
 		}
 
 		/** Position in map pixel coordinates (0,0 = top-left of image) */
-		FVector2D MapPosition;
+		FVector2D MapPosition = FVector2D::ZeroVector;
 		
 		/** Alignment anchor point (0,0 = top-left, 0.5,0.5 = center, 1,1 = bottom-right) */
-		FVector2D Alignment;
+		FVector2D Alignment = FVector2D(0.5f, 0.5f);
 		
 		/** Additional offset in screen pixels after alignment */
-		FVector2D PixelOffset;
+		FVector2D PixelOffset = FVector2D::ZeroVector;
 	};
 
 	SLATE_BEGIN_ARGS(SCorniferMapView)
@@ -73,9 +89,9 @@ public:
 	/** Add a child widget at a specific map position */
 	FMapSlot& AddSlot()
 	{
-		FMapSlot& NewSlot = *new FMapSlot();
-		Children.Add(&NewSlot);
-		return NewSlot;
+		FMapSlot& NewSlot = *(new FMapSlot());
+		Children.AddSlot(MoveTemp(NewSlot));
+		return Children[Children.Num() - 1];
 	}
 
 	/** Remove a specific child widget */
