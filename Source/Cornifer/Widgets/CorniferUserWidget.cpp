@@ -2,14 +2,15 @@
 
 #include "CorniferUserWidget.h"
 #include "CoreMinimal.h"
-#include "SCorniferZoomPan.h"
+#include "SCorniferMapView.h"
 #include "Cornifer/CorniferDefaultValues.h"
 // For programmatic focus
 #include "Framework/Application/SlateApplication.h"
+#include "Blueprint/WidgetTree.h"
 
 TSharedRef<SWidget> UCorniferUserWidget::RebuildWidget()
 {
-	SlateWidget = SNew(SCorniferZoomPan)
+	SlateWidget = SNew(SCorniferMapView)
 		.Texture(CurrentMapTexture)
 		.InitialZoom(InitialZoom)
 		.MaxZoom(MaxZoom)
@@ -64,4 +65,65 @@ void UCorniferUserWidget::ConfigureMapView(const float InMaxZoom, const float In
 		SlateWidget->SetZoom(InInitialZoom); // first paint after this will clamp to cover viewport
 		UE_LOG(LogTemp, Display, TEXT("Map View Configured"));
 	}
+}
+
+void UCorniferUserWidget::AddMapWidget(UWidget* Child, FVector2D MapPosition, FVector2D Alignment, FVector2D Offset)
+{
+	if (!Child || !SlateWidget.IsValid())
+	{
+		return;
+	}
+
+	// Take ownership of the widget in the UMG widget tree
+	if (WidgetTree)
+	{
+		WidgetTree->RootWidget = Child;
+	}
+
+	// Add the widget's Slate representation to the map view
+	SlateWidget->AddSlot()
+		.MapPosition(MapPosition)
+		.Alignment(Alignment)
+		.PixelOffset(Offset)
+		[
+			Child->TakeWidget()
+		];
+}
+
+void UCorniferUserWidget::ClearMapWidgets()
+{
+	if (SlateWidget.IsValid())
+	{
+		SlateWidget->ClearChildren();
+	}
+}
+
+FVector2D UCorniferUserWidget::MapToScreen(FVector2D MapPx) const
+{
+	if (!SlateWidget.IsValid())
+	{
+		return FVector2D::ZeroVector;
+	}
+
+	// Get the geometry of the Slate widget
+	FGeometry Geometry = GetCachedGeometry();
+	return SlateWidget->MapToScreen(MapPx, Geometry);
+}
+
+FVector2D UCorniferUserWidget::ScreenToMap(FVector2D ScreenPx) const
+{
+	if (!SlateWidget.IsValid())
+	{
+		return FVector2D::ZeroVector;
+	}
+
+	// Get the geometry of the Slate widget
+	FGeometry Geometry = GetCachedGeometry();
+	return SlateWidget->ScreenToMap(ScreenPx, Geometry);
+}
+
+void UCorniferUserWidget::ReleaseSlateResources(bool bReleaseChildren)
+{
+	Super::ReleaseSlateResources(bReleaseChildren);
+	SlateWidget.Reset();
 }
