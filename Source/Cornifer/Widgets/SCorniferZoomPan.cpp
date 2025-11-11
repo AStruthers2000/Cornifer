@@ -65,8 +65,8 @@ int32 SCorniferZoomPan::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
     const FVector2D ImgSize = Brush.ImageSize * Zoom;
 
     // Centered plus user translation
-    FVector2D Pos = (ViewSize - ImgSize) * 0.5f + Translation;
-    FPaintGeometry Geo = AllottedGeometry.ToPaintGeometry(ImgSize, FSlateLayoutTransform(Pos));
+    const FVector2D Pos = (ViewSize - ImgSize) * 0.5f + Translation;
+    const FPaintGeometry Geo = AllottedGeometry.ToPaintGeometry(ImgSize, FSlateLayoutTransform(Pos));
 
     FSlateDrawElement::MakeBox(OutDrawElements, LayerId, Geo, &Brush);
     return LayerId + 1;

@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Cornifer/Types/MapHitColor.h"
-#include "Engine/StreamableManager.h"
 #include "CorniferMapManager.generated.h"
 
 class UCorniferUserWidget;
@@ -36,8 +35,6 @@ private:
 
 	UPROPERTY()
 	UCorniferUserWidget* MapWidget = nullptr;
-	
-	FStreamableManager StreamableManager;
 
 	UPROPERTY()
 	TMap<EMapHitColor, UCorniferMapNode*> MapNodes;

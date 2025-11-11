@@ -70,15 +70,11 @@ void UCorniferMapManager::ShowMap()
 		MapWidget = CreateWidget<UCorniferUserWidget>(GetWorld(), UCorniferUserWidget::StaticClass());
 		if (!MapWidget) return;
 		// Apply view configuration from data asset
-		MapWidget->ConfigureMapView(MapData->MaxZoom, MapData->ZoomSpeed);
-		MapWidget->ConfigureInitialZoom(MapData->InitialZoom);
+		MapWidget->ConfigureMapView(MapData->MaxZoom, MapData->ZoomSpeed, MapData->InitialZoom);
 		MapWidget->AddToViewport(MapData->ZOrder);
 	}
 
-	StreamableManager.RequestAsyncLoad(MapData->MapTexture.ToSoftObjectPath(), [this]()
-	{
-		MapWidget->SetMapTexture(MapData->MapTexture.Get());
-	});
+	MapWidget->SetMapTexture(MapData->MapTexture);
 }
 
 void UCorniferMapManager::HideMap()

@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Brushes/SlateImageBrush.h"
+#include "Cornifer/CorniferDefaultValues.h"
 
 class UTexture2D;
 
@@ -22,10 +23,31 @@ public:
 	void SetTexture(UTexture2D* InTexture);
 	void ResetView();
 
-	void SetMaxZoom(float InMaxZoom) { MaxZoom = FMath::Max(1.0f, InMaxZoom); }
-	void SetZoomSpeed(float InZoomSpeed) { ZoomSpeed = FMath::Max(1.01f, InZoomSpeed); }
-	void SetZoom(float InZoom) { Zoom = FMath::Clamp(InZoom, 0.1f, MaxZoom); bDidFirstPaint = false; Invalidate(EInvalidateWidget::Paint); }
-	void ResetTranslation() { Translation = FVector2D::ZeroVector; Invalidate(EInvalidateWidget::Paint); }
+	void SetMaxZoom(const float InMaxZoom)
+	{
+		MaxZoom = FMath::Max(GMinimum_Max_Zoom_Level, InMaxZoom);
+		UE_LOG(LogTemp, Display, TEXT("ConfigureMapView: Max zoom: %2.4f"), MaxZoom);
+	}
+
+	void SetZoomSpeed(const float InZoomSpeed)
+	{
+		ZoomSpeed = FMath::Max(GMinimum_Zoom_Speed, InZoomSpeed);
+		UE_LOG(LogTemp, Display, TEXT("ConfigureMapView: Zoom speed: %2.4f"), ZoomSpeed);
+	}
+
+	void SetZoom(const float InZoom)
+	{
+		Zoom = FMath::Clamp(InZoom, GMinimum_Initial_Zoom_Level, MaxZoom);
+		bDidFirstPaint = false;
+		Invalidate(EInvalidateWidget::Paint);
+		UE_LOG(LogTemp, Display, TEXT("ConfigureMapView: Initial zoom: %2.4f"), Zoom);
+	}
+	
+	void ResetTranslation()
+	{
+		Translation = FVector2D::ZeroVector;
+		Invalidate(EInvalidateWidget::Paint);
+	}
 
 private:
 	// SWidget overrides
