@@ -75,10 +75,13 @@ void UCorniferUserWidget::AddMapWidget(UWidget* Child, FVector2D MapPosition, FV
 	}
 
 	// Take ownership of the widget in the UMG widget tree
-	if (WidgetTree)
+	if (!WidgetTree)
 	{
-		WidgetTree->RootWidget = Child;
+		WidgetTree = NewObject<UWidgetTree>(this);
 	}
+
+	// Add widget to the tree (not as root, but as a child we're managing)
+	Child->Rename(nullptr, WidgetTree);
 
 	// Add the widget's Slate representation to the map view
 	SlateWidget->AddSlot()

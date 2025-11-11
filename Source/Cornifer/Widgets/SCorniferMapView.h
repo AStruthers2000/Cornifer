@@ -57,7 +57,7 @@ public:
 		, _MaxZoom(10.f)
 		, _ZoomSpeed(1.1f)
 	{
-		_Visibility = EVisibility::SelfHitTestInvisible;
+		_Visibility = EVisibility::Visible;
 	}
 		SLATE_ARGUMENT(UTexture2D*, Texture)
 		SLATE_ARGUMENT(float, InitialZoom)
