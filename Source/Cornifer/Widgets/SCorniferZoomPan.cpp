@@ -8,8 +8,10 @@
 void SCorniferZoomPan::Construct(const FArguments& InArgs)
 {
     Texture = InArgs._Texture;
-    Zoom = FMath::Clamp(InArgs._InitialZoom, 0.1f, 10.f);
     UpdateBrushFromTexture();
+    // Note: We can't properly clamp zoom here since we don't have viewport size yet.
+    // Will be clamped on first paint/interaction.
+    Zoom = FMath::Max(InArgs._InitialZoom, 0.1f);
     ChildSlot[SNullWidget::NullWidget]; // we draw directly
 }
 
@@ -22,7 +24,9 @@ void SCorniferZoomPan::SetTexture(UTexture2D* InTexture)
 
 void SCorniferZoomPan::ResetView()
 {
-    Zoom = 1.f; Translation = FVector2D::ZeroVector;
+    Translation = FVector2D::ZeroVector;
+    // Zoom will be clamped to minimum on next paint/interaction
+    Zoom = 1.f;
     Invalidate(EInvalidateWidget::Paint);
 }
 
@@ -92,11 +96,13 @@ FReply SCorniferZoomPan::OnMouseMove(const FGeometry& MyGeometry, const FPointer
 
 FReply SCorniferZoomPan::OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
+    const FVector2D ViewSize = MyGeometry.GetLocalSize();
+    const float MinZoom = GetMinimumZoom(ViewSize);
+    
     float OldZoom = Zoom;
-    Zoom = FMath::Clamp(Zoom * (MouseEvent.GetWheelDelta() > 0 ? 1.1f : 1.f/1.1f), 0.1f, 10.f);
+    Zoom = FMath::Clamp(Zoom * (MouseEvent.GetWheelDelta() > 0 ? 1.1f : 1.f/1.1f), MinZoom, 10.f);
 
     // Zoom about cursor point: adjust translation so the cursor stays on the same image point.
-    const FVector2D ViewSize = MyGeometry.GetLocalSize();
     const FVector2D ImgSizeOld = Brush.ImageSize * OldZoom;
     const FVector2D ImgSizeNew = Brush.ImageSize * Zoom;
 
@@ -111,16 +117,30 @@ FReply SCorniferZoomPan::OnMouseWheel(const FGeometry& MyGeometry, const FPointe
     return FReply::Handled();
 }
 
+float SCorniferZoomPan::GetMinimumZoom(const FVector2D& ViewportSize) const
+{
+    if (Brush.ImageSize.X <= 0.f || Brush.ImageSize.Y <= 0.f || ViewportSize.X <= 0.f || ViewportSize.Y <= 0.f)
+    {
+        return 0.1f; // fallback
+    }
+    
+    // Calculate zoom needed to fit viewport width and height
+    const float ZoomToFitWidth = ViewportSize.X / Brush.ImageSize.X;
+    const float ZoomToFitHeight = ViewportSize.Y / Brush.ImageSize.Y;
+    
+    // Use the larger of the two to ensure the image always covers the viewport
+    return FMath::Max(ZoomToFitWidth, ZoomToFitHeight);
+}
+
 FVector2D SCorniferZoomPan::ClampTranslation(const FVector2D& In, const FVector2D& ViewportSize) const
 {
     const FVector2D ImgSize = Brush.ImageSize * Zoom;
-    // Allow some overscroll if image smaller than view; clamp when larger.
+    // Always clamp translation so image borders never leave viewport borders
     const FVector2D MaxOffset = (ImgSize - ViewportSize) * 0.5f;
-    if (ImgSize.X <= ViewportSize.X && ImgSize.Y <= ViewportSize.Y)
-        return In; // no clamp needed when fully inside
 
     FVector2D Out = In;
-    if (ImgSize.X > ViewportSize.X) { Out.X = FMath::Clamp(Out.X, -MaxOffset.X, MaxOffset.X); }
-    if (ImgSize.Y > ViewportSize.Y) { Out.Y = FMath::Clamp(Out.Y, -MaxOffset.Y, MaxOffset.Y); }
+    // Clamp each axis independently
+    Out.X = FMath::Clamp(Out.X, -MaxOffset.X, MaxOffset.X);
+    Out.Y = FMath::Clamp(Out.Y, -MaxOffset.Y, MaxOffset.Y);
     return Out;
 }

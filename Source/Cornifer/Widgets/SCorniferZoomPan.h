@@ -30,6 +30,7 @@ private:
 	virtual FReply OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 
 	void UpdateBrushFromTexture() const;
+	float GetMinimumZoom(const FVector2D& ViewportSize) const;
 	FVector2D ClampTranslation(const FVector2D& InTranslation, const FVector2D& ViewportSize) const;
 
 	TWeakObjectPtr<UTexture2D> Texture;
