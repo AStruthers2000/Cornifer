@@ -8,6 +8,9 @@
 #include "DataAsset_Map.h"
 #include "DataAsset_MapEdge.h"
 #include "Blueprint/UserWidget.h"
+#include "Cornifer/Widgets/CorniferMapNodeWidget.h"
+#include "Engine/StreamableManager.h"
+#include "Engine/Texture2D.h"
 
 void UCorniferMapManager::Initialize(UDataAsset_Map const* Map, const bool bImmediatelyShowMap)
 {
@@ -64,7 +67,8 @@ void UCorniferMapManager::ShowMap()
 	if (!bIsInitialized || !MapData) return;
 
 	if (MapData->MapTexture.IsNull()) return;
-	
+
+	// Ensure the main map widget exists
 	if (!MapWidget)
 	{
 		MapWidget = CreateWidget<UCorniferUserWidget>(GetWorld(), UCorniferUserWidget::StaticClass());
@@ -74,7 +78,66 @@ void UCorniferMapManager::ShowMap()
 		MapWidget->AddToViewport(MapData->ZOrder);
 	}
 
-	MapWidget->SetMapTexture(MapData->MapTexture);
+	// We need the texture size and any node widget classes; load them together
+	TArray<FSoftObjectPath> ToLoad;
+	ToLoad.Add(MapData->MapTexture.ToSoftObjectPath());
+	for (const auto& Pair : MapData->MapNodes)
+	{
+		if (const UDataAsset_MapNode* NodeDA = Pair.Value)
+		{
+			if (!NodeDA->MapNodeWidgetClass.IsNull())
+			{
+				ToLoad.Add(NodeDA->MapNodeWidgetClass.ToSoftObjectPath());
+			}
+		}
+	}
+
+	static FStreamableManager Streamable;
+	Streamable.RequestAsyncLoad(ToLoad, FStreamableDelegate::CreateWeakLambda(this, [this]()
+	{
+		// Texture now loaded; set it on the map widget (idempotent)
+		MapWidget->SetMapTexture(MapData->MapTexture);
+
+		UTexture2D* Texture = MapData->MapTexture.Get();
+		if (!Texture) { return; }
+
+		const float MapW = static_cast<float>(Texture->GetSizeX());
+		const float MapH = static_cast<float>(Texture->GetSizeY());
+
+		// Rebuild node widgets each time map is shown to match current data
+		MapWidget->ClearMapWidgets();
+
+		UWorld* World = GetWorld();
+		if (!World) { return; }
+
+		for (const auto& Pair : MapData->MapNodes)
+		{
+			UDataAsset_MapNode* NodeDA = Pair.Value;
+			if (!NodeDA) { continue; }
+
+			UClass* WidgetClass = nullptr;
+			if (!NodeDA->MapNodeWidgetClass.IsNull())
+			{
+				WidgetClass = NodeDA->MapNodeWidgetClass.Get();
+			}
+			if (WidgetClass == nullptr)
+			{
+				WidgetClass = UCorniferMapNodeWidget::StaticClass();
+			}
+
+			UCorniferMapNodeWidget* NodeWidget = CreateWidget<UCorniferMapNodeWidget>(World, WidgetClass);
+			if (!NodeWidget) { continue; }
+
+			// Give the widget its data
+			NodeWidget->InitializeFromNode(NodeDA);
+
+			// Convert UV (0..1) to map pixels
+			const FVector2D MapPx(NodeDA->LocationUV.X * MapW, NodeDA->LocationUV.Y * MapH);
+
+			// Center alignment by default; no extra offset
+			MapWidget->AddMapWidget(NodeWidget, MapPx, FVector2D(0.5f, 0.5f), FVector2D::ZeroVector);
+		}
+	}));
 }
 
 void UCorniferMapManager::HideMap()

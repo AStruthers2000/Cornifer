@@ -6,7 +6,7 @@
 #include "Engine/StreamableManager.h"
 #include "CorniferUserWidget.generated.h"
 
-class SCorniferZoomPan;
+class SCorniferMapView;
 class UTexture2D;
 
 UCLASS(BlueprintType)
@@ -25,14 +25,31 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Cornifer|Config")
 	void ConfigureMapView(float InMaxZoom, float InZoomSpeed, float InInitialZoom);
 
+	// Add a widget at a specific map position (in map pixel coordinates)
+	UFUNCTION(BlueprintCallable, Category = "Cornifer|MapWidgets")
+	void AddMapWidget(UWidget* Child, FVector2D MapPosition, FVector2D Alignment, FVector2D Offset);
+
+	// Clear all map widgets
+	UFUNCTION(BlueprintCallable, Category = "Cornifer|MapWidgets")
+	void ClearMapWidgets();
+
+	// Convert map-space coordinates to screen-space coordinates
+	UFUNCTION(BlueprintCallable, Category = "Cornifer|Coordinates")
+	FVector2D MapToScreen(FVector2D MapPx) const;
+
+	// Convert screen-space coordinates to map-space coordinates
+	UFUNCTION(BlueprintCallable, Category = "Cornifer|Coordinates")
+	FVector2D ScreenToMap(FVector2D ScreenPx) const;
+
 protected:
 	virtual TSharedRef<SWidget> RebuildWidget() override;
 	virtual void NativeConstruct() override;
+	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
 
 private:
 	FStreamableManager StreamableManager;
 
-	TSharedPtr<SCorniferZoomPan> SlateWidget;
+	TSharedPtr<SCorniferMapView> SlateWidget;
 
 	UPROPERTY()
 	UTexture2D* CurrentMapTexture = nullptr;
